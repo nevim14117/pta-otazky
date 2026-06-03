@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Bird Database - Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="hero">
+        <h2>Welcome to the Bird Database</h2>
+        <p>Explore information about {{ total_birds }} different bird species</p>
+    </section>
+
+    <section class="search-section">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search birds by name, species, habitat...">
+            <button id="searchBtn">Search</button>
+        </div>
+    </section>
+
+    <section class="birds-grid">
+        <h2>Bird Species</h2>
+        <div id="birdsList" class="grid">
+            {% if birds %}
+                {% for bird in birds %}
+                <div class="bird-card">
+                    <div class="bird-header">
+                        <h3>{{ bird.get('Name', 'Unknown') }}</h3>
+                        <p class="species">{{ bird.get('Species', 'N/A') }}</p>
+                    </div>
+                    <div class="bird-info">
+                        {% for key, value in bird.items() %}
+                            {% if key not in ['Name', 'Species'] %}
+                            <p><strong>{{ key }}:</strong> {{ value }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <a href="/bird/{{ loop.index0 }}" class="btn-details">View Details</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-data">No bird data available. Please add dataset_ptaci_final.csv to the birds/ folder.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<script>
+    document.getElementById('searchBtn').addEventListener('click', searchBirds);
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchBirds();
+    });
+
+    function searchBirds() {
+        const query = document.getElementById('searchInput').value;
+        fetch(`/api/birds?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(data => {
+                const list = document.getElementById('birdsList');
+                if (data.length === 0) {
+                    list.innerHTML = '<p class="no-data">No birds found matching your search.</p>';
+                } else {
+                    list.innerHTML = data.map((bird, idx) => `
+                        <div class="bird-card">
+                            <div class="bird-header">
+                                <h3>${bird.Name || 'Unknown'}</h3>
+                                <p class="species">${bird.Species || 'N/A'}</p>
+                            </div>
+                            <div class="bird-info">
+                                ${Object.entries(bird).filter(([k]) => !['Name', 'Species'].includes(k))
+                                    .map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join('')}
+                            </div>
+                            <a href="/bird/${idx}" class="btn-details">View Details</a>
+                        </div>
+                    `).join('');
+                }
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bird.get('Name', 'Bird') }} - Bird Database{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="detail-section">
+        <div class="detail-header">
+            <a href="/" class="btn-back">← Back to List</a>
+            <h2>{{ bird.get('Name', 'Unknown Bird') }}</h2>
+            <p class="species-subtitle">{{ bird.get('Species', 'Species Unknown') }}</p>
+        </div>
+
+        <div class="detail-content">
+            <div class="detail-card">
+                <h3>Information</h3>
+                <div class="info-grid">
+                    {% for key, value in bird.items() %}
+                    <div class="info-item">
+                        <span class="info-label">{{ key }}:</span>
+                        <span class="info-value">{{ value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <h3>Additional Details</h3>
+                <p>This bird (#{{ bird_id + 1 }}) is part of our comprehensive bird database. 
+                   Use the search feature to discover more species with similar characteristics.</p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

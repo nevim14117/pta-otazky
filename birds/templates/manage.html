@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Správa záznamů{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="manage-header">
+        <h1>Správa záznamů</h1>
+        <a href="{{ url_for('add_record') }}" class="btn btn-primary">Přidat nový záznam</a>
+    </section>
+
+    {% if records %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Druh ptáka</th>
+                    <th>Datum pozorování</th>
+                    <th>Lokalita</th>
+                    <th>Počet jedinců</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record['id'] }}</td>
+                    <td>{{ record['druh_ptaka'] }}</td>
+                    <td>{{ record['datum_pozorovani'] }}</td>
+                    <td>{{ record['lokalita'] }}</td>
+                    <td>{{ record['pocet_jedincu'] or '-' }}</td>
+                    <td class="actions-cell">
+                        <a href="{{ url_for('edit_record', record_id=record['id']) }}" class="btn btn-secondary btn-small">Upravit</a>
+                        <form action="{{ url_for('delete_record', record_id=record['id']) }}" method="post" class="inline-form" onsubmit="return confirm('Opravdu smazat tento záznam?');">
+                            <button type="submit" class="btn btn-danger btn-small">Smazat</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="result-info">
+        Zatím neexistují žádné záznamy. Přidejte první záznam kliknutím na tlačítko výše.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

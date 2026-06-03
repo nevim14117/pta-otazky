@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="form-card">
+        <h1>{{ form_title }}</h1>
+        {% if error %}
+        <div class="form-error">{{ error }}</div>
+        {% endif %}
+        <form method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="druh_ptaka">Druh ptáka</label>
+                    <input id="druh_ptaka" name="druh_ptaka" type="text" value="{{ record['druh_ptaka'] if record else '' }}" required>
+                    {% if errors and errors.get('druh_ptaka') %}
+                    <div class="field-error">{{ errors.get('druh_ptaka') }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="datum_pozorovani">Datum pozorování</label>
+                    <input id="datum_pozorovani" name="datum_pozorovani" type="date" value="{{ record['datum_pozorovani'] if record else '' }}" required>
+                    {% if errors and errors.get('datum_pozorovani') %}
+                    <div class="field-error">{{ errors.get('datum_pozorovani') }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="lokalita">Lokalita</label>
+                    <input id="lokalita" name="lokalita" type="text" value="{{ record['lokalita'] if record else '' }}" required>
+                    {% if errors and errors.get('lokalita') %}
+                    <div class="field-error">{{ errors.get('lokalita') }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="pocet_jedincu">Počet jedinců</label>
+                    <input id="pocet_jedincu" name="pocet_jedincu" type="number" value="{{ record['pocet_jedincu'] if record else '' }}">
+                    {% if errors and errors.get('pocet_jedincu') %}
+                    <div class="field-error">{{ errors.get('pocet_jedincu') }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="poznamka">Poznámka</label>
+                    <textarea id="poznamka" name="poznamka" rows="4">{{ record['poznamka'] if record else '' }}</textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Uložit</button>
+                <a href="{{ url_for('manage_records') }}" class="btn btn-secondary">Zrušit</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Databáze ptáků{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Databáze ptáků</h1>
+</header>
+
+<div class="container">
+    <div class="filter-panel">
+        <h2>Filtry</h2>
+        <form method="GET" action="/">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="rad">Řád</label>
+                    <select id="rad" name="rad">
+                        <option value="">-- Všechny --</option>
+                        {% for r in rady %}
+                        <option value="{{ r }}" {% if filters.get('rad') == r %}selected{% endif %}>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="typ_potravy">Typ potravy</label>
+                    <select id="typ_potravy" name="typ_potravy">
+                        <option value="">-- Všechny --</option>
+                        {% for t in typ_potravy_list %}
+                        <option value="{{ t }}" {% if filters.get('typ_potravy') == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="vyskyt_kontinent">Kontinent</label>
+                    <select id="vyskyt_kontinent" name="vyskyt_kontinent">
+                        <option value="">-- Všechny --</option>
+                        {% for k in kontinenty %}
+                        <option value="{{ k }}" {% if filters.get('vyskyt_kontinent') == k %}selected{% endif %}>{{ k }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="migrace">Migrace</label>
+                    <select id="migrace" name="migrace">
+                        <option value="">-- Všechny --</option>
+                        <option value="1" {% if filters.get('migrace') == '1' %}selected{% endif %}>Tažný</option>
+                        <option value="0" {% if filters.get('migrace') == '0' %}selected{% endif %}>Netažný</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status_ohrozeni">Status ohrožení</label>
+                    <select id="status_ohrozeni" name="status_ohrozeni">
+                        <option value="">-- Všechny --</option>
+                        {% for s in statusy %}
+                        <option value="{{ s }}" {% if filters.get('status_ohrozeni') == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sort_by">Řadit podle</label>
+                    <select id="sort_by" name="sort_by">
+                        <option value="nazev" {% if filters.get('sort_by', 'nazev') == 'nazev' %}selected{% endif %}>Název</option>
+                        <option value="vedecky_nazev" {% if filters.get('sort_by') == 'vedecky_nazev' %}selected{% endif %}>Vědecký název</option>
+                        <option value="rad" {% if filters.get('sort_by') == 'rad' %}selected{% endif %}>Řád</option>
+                        <option value="celed" {% if filters.get('sort_by') == 'celed' %}selected{% endif %}>Čeleď</option>
+                        <option value="delka_cm" {% if filters.get('sort_by') == 'delka_cm' %}selected{% endif %}>Délka (cm)</option>
+                        <option value="rozpeti_cm" {% if filters.get('sort_by') == 'rozpeti_cm' %}selected{% endif %}>Rozpětí (cm)</option>
+                        <option value="hmotnost_g" {% if filters.get('sort_by') == 'hmotnost_g' %}selected{% endif %}>Hmotnost (g)</option>
+                        <option value="status_ohrozeni" {% if filters.get('sort_by') == 'status_ohrozeni' %}selected{% endif %}>Status ohrožení</option>
+                        <option value="typ_potravy" {% if filters.get('sort_by') == 'typ_potravy' %}selected{% endif %}>Potrava</option>
+                        <option value="migrace" {% if filters.get('sort_by') == 'migrace' %}selected{% endif %}>Migrace</option>
+                        <option value="vyskyt_kontinent" {% if filters.get('sort_by') == 'vyskyt_kontinent' %}selected{% endif %}>Kontinent</option>
+                        <option value="snuska_ks" {% if filters.get('sort_by') == 'snuska_ks' %}selected{% endif %}>Snůška (ks)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sort_order">Směr řazení</label>
+                    <select id="sort_order" name="sort_order">
+                        <option value="ASC" {% if filters.get('sort_order', 'ASC') == 'ASC' %}selected{% endif %}>Vzestupně</option>
+                        <option value="DESC" {% if filters.get('sort_order') == 'DESC' %}selected{% endif %}>Sestupně</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="hmotnost_min">Hmotnost od (g)</label>
+                    <input type="number" id="hmotnost_min" name="hmotnost_min" value="{{ filters.get('hmotnost_min', '') }}" placeholder="min">
+                </div>
+                <div class="filter-group">
+                    <label for="hmotnost_max">Hmotnost do (g)</label>
+                    <input type="number" id="hmotnost_max" name="hmotnost_max" value="{{ filters.get('hmotnost_max', '') }}" placeholder="max">
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button type="submit" class="btn-filter">Filtrovat</button>
+                <button type="button" class="btn-reset" onclick="location.href='/';">Zrušit filtry</button>
+            </div>
+        </form>
+    </div>
+
+    {% if stats %}
+    <div class="stats-section">
+        <div class="stat-card">
+            <h3>Počet druhů</h3>
+            <div><span class="stat-value">{{ stats['pocet'] or 0 }}</span></div>
+        </div>
+        <div class="stat-card">
+            <h3>Průměrná délka</h3>
+            <div><span class="stat-value">{{ stats['prum_delka'] or '-' }}</span><span class="stat-unit">cm</span></div>
+        </div>
+        <div class="stat-card">
+            <h3>Průměrná hmotnost</h3>
+            <div><span class="stat-value">{{ stats['prum_hmotnost'] or '-' }}</span><span class="stat-unit">g</span></div>
+        </div>
+        <div class="stat-card">
+            <h3>Maximální hmotnost</h3>
+            <div><span class="stat-value">{{ stats['max_hmotnost'] or '-' }}</span><span class="stat-unit">g</span></div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if ptaci %}
+    <div class="result-info">
+        Nalezeno <strong>{{ ptaci|length }}</strong> ptáků
+    </div>
+    {% else %}
+    <div class="result-info" style="background-color: #fff3cd; border-left-color: #ffc107; color: #856404;">
+        Žádní ptáci se neshodují s vybranými filtry.
+    </div>
+    {% endif %}
+
+    {% if ptaci %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Vědecký název</th>
+                    <th>Řád</th>
+                    <th>Čeleď</th>
+                    <th>Délka (cm)</th>
+                    <th>Rozpětí (cm)</th>
+                    <th>Hmotnost (g)</th>
+                    <th>Status</th>
+                    <th>Potrava</th>
+                    <th>Migrace</th>
+                    <th>Kontinent</th>
+                    <th>Snůška (ks)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ptak in ptaci %}
+                <tr>
+                    <td>{{ ptak['nazev'] }}</td>
+                    <td><em>{{ ptak['vedecky_nazev'] }}</em></td>
+                    <td>{{ ptak['rad'] or '-' }}</td>
+                    <td>{{ ptak['celed'] or '-' }}</td>
+                    <td>{{ ptak['delka_cm'] or '-' }}</td>
+                    <td>{{ ptak['rozpeti_cm'] or '-' }}</td>
+                    <td>{{ ptak['hmotnost_g'] or '-' }}</td>
+                    <td>{{ ptak['status_ohrozeni'] or '-' }}</td>
+                    <td>{{ ptak['typ_potravy'] or '-' }}</td>
+                    <td>{% if ptak['migrace'] == 1 %}Ano{% elif ptak['migrace'] == 0 %}Ne{% else %}-{% endif %}</td>
+                    <td>{{ ptak['vyskyt_kontinent'] or '-' }}</td>
+                    <td>{{ ptak['snuska_ks'] or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if ptaci %}
+    <div class="charts-section">
+        <h2>Grafické přehledy</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Počet druhů podle řádu</h3>
+                <canvas id="chartRad"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Tažní vs. netažní ptáci</h3>
+                <canvas id="chartMigrace"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Průměrná hmotnost podle typu potravy</h3>
+                <canvas id="chartPotraba"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Počet druhů podle kontinentu</h3>
+                <canvas id="chartKontinent"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    {% if graf_rad_labels %}
+    new Chart(document.getElementById('chartRad'), {
+        type: 'bar',
+        data: {
+            labels: {{ graf_rad_labels|tojson }},
+            datasets: [{
+                label: 'Počet druhů',
+                data: {{ graf_rad_data|tojson }},
+                backgroundColor: '#2d6a4f',
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if migrace_labels %}
+    new Chart(document.getElementById('chartMigrace'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ migrace_labels|tojson }},
+            datasets: [{
+                data: {{ migrace_data|tojson }},
+                backgroundColor: ['#2d6a4f', '#a3b899'],
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if graf_potraba_labels %}
+    new Chart(document.getElementById('chartPotraba'), {
+        type: 'bar',
+        data: {
+            labels: {{ graf_potraba_labels|tojson }},
+            datasets: [{
+                label: 'Průměrná hmotnost (g)',
+                data: {{ graf_potraba_data|tojson }},
+                backgroundColor: '#1b4332',
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if graf_kontinent_labels %}
+    new Chart(document.getElementById('chartKontinent'), {
+        type: 'bar',
+        data: {
+            labels: {{ graf_kontinent_labels|tojson }},
+            datasets: [{
+                label: 'Počet druhů',
+                data: {{ graf_kontinent_data|tojson }},
+                backgroundColor: '#40916c',
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

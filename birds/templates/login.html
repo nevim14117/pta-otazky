@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Přihlášení{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="auth-card">
+        <h1>Přihlášení do správy</h1>
+        {% if error %}
+        <div class="form-error">{{ error }}</div>
+        {% endif %}
+        <form method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="username">Uživatel</label>
+                    <input id="username" name="username" type="text" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Heslo</label>
+                    <input id="password" name="password" type="password" required>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Přihlásit</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Zpět</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
